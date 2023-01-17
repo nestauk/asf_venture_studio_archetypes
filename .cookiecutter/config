@@ -1,0 +1,5 @@
+# Change these at your peril:
+export PROJECT_NAME=asf_venture_studio_archetypes
+export REPO_NAME=asf_venture_studio_archetypes
+export DESCRIPTION=Using EPC and TrustMark data to identify properties archetypes
+export PROJECT_OPENNESS=private
