@@ -292,7 +292,7 @@ prep_epc = epc_data.load_preprocessed_epc_data(
         "CONSTRUCTION_AGE_BAND",
     ],
     batch="2021_Q4_0721",
-    n_samples=5000,
+    n_samples=1000,
 )
 
 prep_epc.shape
@@ -301,10 +301,11 @@ prep_epc.shape
 prep_epc = epc_data.load_preprocessed_epc_data(
     data_path="S3",
     version="preprocessed_dedupl",
+    usecols=None,
     batch="2021_Q4_0721",
     n_samples=5000,
 )
-
+print(prep_epc.shape)
 prep_epc.T
 
 # %% [markdown]
