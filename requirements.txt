@@ -1,3 +1,4 @@
 numpy
 pandas
+pytest
 asf_core_data@ git+ssh://git@github.com/nestauk/asf_core_data.git@19_epc_from_s3
