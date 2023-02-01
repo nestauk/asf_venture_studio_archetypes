@@ -1,4 +1,6 @@
 numpy
 pandas
 pytest
+sklearn
 asf_core_data@ git+ssh://git@github.com/nestauk/asf_core_data.git@19_epc_from_s3
+git+https://github.com/nestauk/nesta_ds_utils.git

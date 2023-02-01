@@ -28,41 +28,26 @@ def test_extract_year_inspection():
     )
 
 
-def test_fill_nans_num():
+def test_fill_nans():
     # Prepare test data
     df = pd.DataFrame({"col1": [1, 2, np.nan, 2]})
 
     # Process
-    result = epc_processing.fill_nans_num(df, replace_with="mode")
+    result = epc_processing.fill_nans(df, replace_with="mode")
 
     # Assert that nan is filled with mode
     assert result["col1"].tolist() == [1, 2, 2, 2]
 
 
-def test_hot_one_encoding():
-    # Prepare test data
-    data = {
-        "col1": [1, 2, 3, 4],
-        "col2": ["A", "B", "C", "A"],
-        "col3": [True, False, True, False],
-    }
-    df = pd.DataFrame(data)
+def test_one_hot_encoding():
+    # Test data
+    data = {"column1": ["A", "B", "C", "A"], "column2": [1, 2, 3, 4]}
 
-    # Call the function under test
-    result = epc_processing.hot_one_encoding(df, cat_feat=["col2", "col3"])
+    # Create test dataframe
+    epc_df = pd.DataFrame(data)
 
-    # Assert that one-hot encoding was applied correctly
-    assert result.columns.tolist() == [
-        "col1",
-        "col2",
-        "col3",
-        "col2_A",
-        "col2_B",
-        "col2_C",
-        "col3_False",
-        "col3_True",
-    ]
-    assert result.loc[0].tolist() == [1, "A", True, 1, 0, 0, 0, 1]
-    assert result.loc[1].tolist() == [2, "B", False, 0, 1, 0, 1, 0]
-    assert result.loc[2].tolist() == [3, "C", True, 0, 0, 1, 0, 1]
-    assert result.loc[3].tolist() == [4, "A", False, 1, 0, 0, 1, 0]
+    # Call the one_hot_encoding function
+    result = epc_processing.one_hot_encoding(epc_df, ["column1"])
+
+    assert result.shape == (4, 3)
+    assert result.columns.tolist() == ["column1_A", "column1_B", "column1_C"]
