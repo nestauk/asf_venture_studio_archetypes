@@ -29,6 +29,7 @@ def test_extract_year_inspection():
 
 
 def test_fill_nans():
+    """Test that fill nans with "mode" option return the expected value"""
     # Prepare test data
     df = pd.DataFrame({"col1": [1, 2, np.nan, 2]})
 
@@ -40,6 +41,7 @@ def test_fill_nans():
 
 
 def test_one_hot_encoding():
+    """Test that the one hot encoding works as expected"""
     # Test data
     data = {"column1": ["A", "B", "C", "A"], "column2": [1, 2, 3, 4]}
 

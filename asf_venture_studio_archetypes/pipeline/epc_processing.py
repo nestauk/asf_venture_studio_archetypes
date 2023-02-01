@@ -132,4 +132,3 @@ def pca_perform(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
 
     # Create a DataFrame from the PCA transformed data
     return pca
-    return  # pd.DataFrame(X_pca, columns=['PCA%i' % i for i in range(X_pca.shape[1])])
