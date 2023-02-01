@@ -1,5 +1,10 @@
 import pandas as pd
 
+# local data directory
+LOCAL_DATA_DIR = "/Users/enricogavagnin/Documents/data/EPC"
+
+
+# Feature selection
 selected_feat = pd.read_csv(
     "asf_venture_studio_archetypes/config/epc_feature_selection.csv"
 )

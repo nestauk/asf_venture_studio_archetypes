@@ -1,4 +1,21 @@
-# asf_venture_studio_archetypes
+# ASF Venture-Studio
+
+This repository contains the analysis for the project in collaboration with Furbnow and Carno of the Venture Studio. The aim of the project is to identify property archetypes based on Trustmark data to inform retrofitting assessment.
+
+## EPC data prototype
+
+We use EPC data for the prototype phase. Trustmark data, or alternative sources, will be consider at later stages.
+
+#### Instructions
+
+To reproduce any part of the analysis:
+
+- Download EPC data following the instructions of [asf_core_data](https://github.com/nestauk/asf_core_data)
+- Setup `conda env` for the project (instructions below)
+- Change the location of your local data directory in `config/base_epc.py`
+- Run any selected part of the analysis form command line. For example:
+
+`python asf_venture_studio_archetypes/pipeline/dimensionality_reduction.py`
 
 ## Setup
 
