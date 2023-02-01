@@ -5,18 +5,18 @@ from asf_venture_studio_archetypes.config import base_epc
 from asf_venture_studio_archetypes.pipeline.epc_processing import *
 from asf_venture_studio_archetypes.utils.viz_utils import plot_pca_corr_feat
 from nesta_ds_utils.viz.altair.saving import save
-from asf_venture_studio_archetypes.config.base_epc import LOCAL_DATA_DIR
+from asf_venture_studio_archetypes.config.base_epc import DATA_DIR
 
 
 def load_and_process_data():
 
     # Load preprocessed epc data
     prep_epc = epc_data.load_preprocessed_epc_data(
-        data_path=LOCAL_DATA_DIR,
+        data_path=DATA_DIR,
         version="preprocessed_dedupl",
         usecols=base_epc.EPC_PREP_CLEAN_USE_FEAT_SELECTION,
         batch="newest",
-        n_samples=100000,  # Comment to run on full dataset (~40 min)
+        n_samples=5000,  # Comment to run on full dataset (~40 min)
     )
 
     # Further data cleaning

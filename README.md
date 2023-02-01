@@ -10,9 +10,8 @@ We use EPC data for the prototype phase. Trustmark data, or alternative sources,
 
 To reproduce any part of the analysis:
 
-- Download EPC data following the instructions of [asf_core_data](https://github.com/nestauk/asf_core_data)
 - Setup `conda env` for the project (instructions below)
-- Change the location of your local data directory in `config/base_epc.py`
+- Change the location data directory in `config/base_epc.py`. This can be either your local directory (you can download EPC data following the instructions of [asf_core_data](https://github.com/nestauk/asf_core_data)), or `"S3"` to fetch data directly from S3 (much slower, should be used only for testing)
 - Run any selected part of the analysis form command line. For example:
 
 `python asf_venture_studio_archetypes/pipeline/dimensionality_reduction.py`

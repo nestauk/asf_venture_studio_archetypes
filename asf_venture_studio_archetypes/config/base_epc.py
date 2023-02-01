@@ -1,7 +1,9 @@
 import pandas as pd
 
-# local data directory
-LOCAL_DATA_DIR = "/Users/enricogavagnin/Documents/data/EPC"
+# Data directory
+# You can set this to your local data directory or "S3"
+DATA_DIR = "S3"
+# DATA_DIR = "/Users/enricogavagnin/Documents/data/EPC"
 
 
 # Feature selection
