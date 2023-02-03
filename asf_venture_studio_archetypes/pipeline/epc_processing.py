@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Union, List
+from typing import Union, List, Type
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import numpy as np
@@ -108,7 +108,7 @@ def standard_scaler(
     return pd.DataFrame(X, columns=num_feat)
 
 
-def pca_perform(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
+def pca_perform(df: pd.DataFrame, **kwargs) -> Type[PCA]:
     """Perform Principal Component Analysis (PCA) on dataframe
 
     Args:
@@ -127,8 +127,4 @@ def pca_perform(df: pd.DataFrame, **kwargs) -> pd.DataFrame:
     # Fit the PCA model to the data
     pca.fit(X)
 
-    # Transform the data using the PCA model
-    X_pca = pca.transform(X)
-
-    # Create a DataFrame from the PCA transformed data
     return pca
