@@ -1,6 +1,9 @@
-numpy
-pandas
-pytest
-sklearn
-asf_core_data@ git+ssh://git@github.com/nestauk/asf_core_data.git@19_epc_from_s3
-git+https://github.com/nestauk/nesta_ds_utils.git
+numpy==1.23.4
+pandas==1.5.1
+geopandas==0.12.2
+matplotlib==3.6.2
+altair==4.2.0
+pytest==7.2.1
+sklearn==0.0.post1
+nesta_ds_utils@git+https://github.com/nestauk/nesta_ds_utils.git
+asf_core_data@ git+ssh://git@github.com/nestauk/asf_core_data.git@pin-boto
