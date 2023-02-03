@@ -49,64 +49,60 @@ def fill_nans(
 
 
 def one_hot_encoding(
-    epc_df: pd.DataFrame, cat_feat: Union[List[str], str] = None
+    epc_df: pd.DataFrame, cols: Union[List[str], str] = None
 ) -> pd.DataFrame:
     """Performs one-hot encoding on categorical columns of a dataframe.
 
     Args:
         epc_df (pd.DataFrame): The input dataframe to be one-hot encoded.
-        cat_feat (Union[List[str], str], optional): List of categorical column names
+        cols (Union[List[str], str], optional): List of nominal column names
         or a single column name. Defaults to all categorical columns.
 
     Returns:
-        pd.DataFrame: The one-hot encoded dataframe with non-categorical columns removed
+        pd.DataFrame: Original DataFrame with the one-hot encoded nominal features
     """
 
     # Get the list of categorical features
-    if not cat_feat:
-        cat_feat = epc_df.columns[epc_df.dtypes == object].tolist()
-    elif isinstance(cat_feat, str):
-        cat_feat = [cat_feat]
-
-    # Initialize the encoded data frame
-    encoded_df = pd.DataFrame()
+    if not cols:
+        cols = epc_df.columns[epc_df.dtypes == object].tolist()
+    elif isinstance(cols, str):
+        cols = [cols]
 
     # One-hot encode each categorical feature
-    for feat in cat_feat:
+    for feat in cols:
         one_hot = pd.get_dummies(epc_df[feat], prefix=feat)
-        encoded_df = pd.concat([encoded_df, one_hot], axis=1)
-
-    return encoded_df
+        epc_df = pd.concat([epc_df, one_hot], axis=1).drop([feat], axis=1)
+    return epc_df
 
 
 def standard_scaler(
-    epc_df: pd.DataFrame, num_feat: Union[List[str], str] = None
+    epc_df: pd.DataFrame, cols: Union[List[str], str] = None
 ) -> pd.DataFrame:
     """Standardize the numerical features of a pandas DataFrame by subtracting the mean
     and scaling to unit variance.
 
     Args:
         epc_df (pd.DataFrame): The input DataFrame containing the features to be standardized.
-        num_feat (Union[List[str], str], optional): The names of the numerical
+        cols (Union[List[str], str], optional): The names of the numerical
         features to be standardized. Defaults to None.
 
     Returns:
-        pd.DataFrame: A new DataFrame with the standardized numerical features, with
-        non-numerical features removed
+        pd.DataFrame: Original DataFrame with the standardized numerical features
     """
 
     # Get the list of categorical features
-    if not num_feat:
-        num_feat = epc_df.select_dtypes(include=np.number).columns.tolist()
-    elif isinstance(num_feat, str):
-        num_feat = [num_feat]
+    if not cols:
+        cols = epc_df.select_dtypes(include=np.number).columns.tolist()
+    elif isinstance(cols, str):
+        cols = [cols]
 
     # Create scaler object
     scaler = StandardScaler()
 
-    X = epc_df[num_feat].values
+    X = epc_df[cols].values
     X = scaler.fit_transform(X)
-    return pd.DataFrame(X, columns=num_feat)
+    epc_df[cols] = pd.DataFrame(X, columns=cols)
+    return epc_df
 
 
 def pca_perform(df: pd.DataFrame, **kwargs) -> Type[PCA]:

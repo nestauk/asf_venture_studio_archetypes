@@ -46,10 +46,15 @@ def test_one_hot_encoding():
     data = {"column1": ["A", "B", "C", "A"], "column2": [1, 2, 3, 4]}
 
     # Create test dataframe
-    epc_df = pd.DataFrame(data)
+    epc_df_test = pd.DataFrame(data)
 
     # Call the one_hot_encoding function
-    result = epc_processing.one_hot_encoding(epc_df, ["column1"])
+    result = epc_processing.one_hot_encoding(epc_df_test, ["column1"])
 
-    assert result.shape == (4, 3)
-    assert result.columns.tolist() == ["column1_A", "column1_B", "column1_C"]
+    assert result.shape == (4, 4)
+    assert result.columns.tolist() == [
+        "column2",
+        "column1_A",
+        "column1_B",
+        "column1_C",
+    ]
