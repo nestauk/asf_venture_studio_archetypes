@@ -59,7 +59,7 @@ def one_hot_encoding(
         or a single column name. Defaults to all categorical columns.
 
     Returns:
-        pd.DataFrame: The one-hot encoded dataframe.
+        pd.DataFrame: The one-hot encoded dataframe with non-categorical columns removed
     """
 
     # Get the list of categorical features
@@ -91,7 +91,8 @@ def standard_scaler(
         features to be standardized. Defaults to None.
 
     Returns:
-        pd.DataFrame: A new DataFrame with the standardized numerical features.
+        pd.DataFrame: A new DataFrame with the standardized numerical features, with
+        non-numerical features removed
     """
 
     # Get the list of categorical features
