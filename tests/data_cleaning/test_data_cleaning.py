@@ -58,3 +58,13 @@ def test_one_hot_encoding():
         "column1_B",
         "column1_C",
     ]
+
+
+def test_remove_outliers():
+    """Test remove outlier  funciton"""
+    # Setup test data
+    df = pd.DataFrame({"A": [1, 2, 3, 4, 102], "B": [2, 3, 4, 5, 6]})
+
+    # Test remove_outliers function with a specified column
+    df_out = epc_processing.remove_outliers(df, cols="A")
+    assert len(df_out) == 4  # Check number of rows in returned DataFrame

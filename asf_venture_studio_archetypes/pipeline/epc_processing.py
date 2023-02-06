@@ -105,6 +105,33 @@ def standard_scaler(
     return epc_df
 
 
+def remove_outliers(
+    df: pd.DataFrame, cols: Union[List[str], str] = None, percentile: int = 99
+) -> pd.DataFrame:
+    """_summary_
+
+    Args:
+        df (pd.DataFrame): DataFrame to process
+        feat (Union[List[str], str], optional): List of features to remove outliers from. Defaults to df.columns.
+        percentile (int, optional): Percentile value to use as upper threshold for removing outliers. Defaults to 99%.
+
+    Returns:
+        pd.DataFrame: DataFrame with outliers removes based on percentile theshold.
+    """
+    if isinstance(cols, str):
+        cols = [cols]
+    elif not cols:
+        cols = df.columns
+
+    for col in cols:
+        threshold = np.percentile(df[~np.isnan(df[col])][col], [percentile])
+
+        # Remove outliers
+        df = df[df[col] <= threshold[0]]
+
+    return df
+
+
 def pca_perform(df: pd.DataFrame, **kwargs) -> Type[PCA]:
     """Perform Principal Component Analysis (PCA) on dataframe
 

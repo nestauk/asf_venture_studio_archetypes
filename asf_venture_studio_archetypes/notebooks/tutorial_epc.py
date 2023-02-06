@@ -326,6 +326,9 @@ wales_epc_reduced = preprocess_epc_data.load_and_preprocess_epc_data(
 )
 
 # %%
+wales_epc_reduced
+
+# %%
 wales_epc_with_MCS_dates = merge_install_dates.manage_hp_install_dates(
     wales_epc_reduced
 )

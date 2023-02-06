@@ -160,7 +160,11 @@ processed_data = pd.concat([scaled_features, encoded_features], axis=1)
 pca = pca_perform(processed_data, n_components=2)
 
 
+# %%
+
 # %% [markdown]
 # ## PCA only on scaled features
 # Following the discussion with Josh, I try to perform the PCA only on numerical features, scaled and then merge back the nominal features
 #
+
+# %%
