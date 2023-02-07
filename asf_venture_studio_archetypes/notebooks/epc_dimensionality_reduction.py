@@ -265,15 +265,61 @@ if oh_encoder:
 
 prep_epc
 
-# %%
-df = pd.DataFrame({"A": [1, np.nan, 3, 4, 102], "B": [2, 3, 4, 5, 6]})
-epc_processing.remove_outliers(df, cols="A")
+# %% [markdown]
+# ## Dev - hybrid pca
+#
 
 # %%
-df = df[df.A < 4]
+# cd ~/asf_venture_studio_archetypes/
 
 
 # %%
-df
+from asf_venture_studio_archetypes.pipeline.dimensionality_reduction import *
+from asf_venture_studio_archetypes.pipeline import epc_processing
+
+# %%
+start_time = time.time()
+print("\nLoading and preprocessing EPC data.")
+processed_data = load_and_process_data()
+end_time = time.time()
+runtime = round((end_time - start_time) / 60)
+print("Loading and preprocessing the EPC data took {} minutes.\n".format(runtime))
+
+# Perform Principal Component Analysis
+start_time = time.time()
+print("Performing Principal Component Analysis (PCA).")
+# Selecting number of components which explain 95% of variance
+pca = pca_perform(processed_data[base_epc.EPC_FEAT_NUMERICAL], n_components=0.95)
+end_time = time.time()
+runtime = round((end_time - start_time) / 60)
+print("Principal Component Analysis took {} minutes.\n".format(runtime))
+
+# # Saving and plotting results
+# start_time = time.time()
+# print("Saving and plotting results of PCA")
+# # Save correlation matrix of between features and components
+pca_corr_feat = pd.DataFrame(pca.components_, columns=base_epc.EPC_FEAT_NUMERICAL).T
+# pca_corr_feat.to_csv("outputs/data/pca_corr_feat.csv")
+# fig = plot_pca_corr_feat(pca_corr_feat)
+# save(fig=fig, name="pca_corr_feat", path="outputs/figures/vegalite")
+# end_time = time.time()
+# runtime = round((end_time - start_time) / 60)
+# print("Saving and plotting results took {} minutes.\n".format(runtime))
+
+# %%
+processed_data
+
+# %%
+np.shape(processed_data[base_epc.EPC_FEAT_NUMERICAL])[1]
+
+pca_transformed_data = pd.DataFrame(
+    pca.transform(processed_data[base_epc.EPC_FEAT_NUMERICAL].values),
+    columns=["PC" + str(c) for c in range(len(pca.components_))],
+)
+
+output_data = pd.concat(
+    [pca_transformed_data, processed_data[base_epc.EPC_FEAT_NOMINAL]], axis=1
+)
+output_data.head()
 
 # %%
