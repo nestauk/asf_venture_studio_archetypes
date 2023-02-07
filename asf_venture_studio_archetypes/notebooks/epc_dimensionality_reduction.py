@@ -28,8 +28,10 @@ from asf_core_data.getters.epc import epc_data, data_batches
 from asf_core_data import Path
 from asf_venture_studio_archetypes.config import base_epc
 from asf_venture_studio_archetypes.pipeline.epc_processing import *
-import seaborn as sns
+
+# import seaborn as sns
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 # %%
@@ -50,7 +52,7 @@ prep_epc = epc_data.load_preprocessed_epc_data(
     version="preprocessed_dedupl",
     usecols=base_epc.EPC_PREP_CLEAN_USE_FEAT_SELECTION,
     batch="newest",
-    n_samples=1000000,
+    n_samples=10000,
 )
 
 prep_epc.shape
@@ -160,11 +162,118 @@ processed_data = pd.concat([scaled_features, encoded_features], axis=1)
 pca = pca_perform(processed_data, n_components=2)
 
 
+# %% [markdown]
+# ## Explore outlier removal for unprocessed features
+
+# %%
+# Load preprocessed epc data
+prep_epc = epc_data.load_preprocessed_epc_data(
+    data_path=LOCAL_DATA_DIR,
+    version="preprocessed_dedupl",
+    n_samples=5000,
+    usecols=base_epc.EPC_SELECTED_FEAT,
+    batch="newest",
+)
+
+# %%
+sns.histplot(prep_epc.CO2_EMISS_CURR_PER_FLOOR_AREA)
+prep_epc[base_epc.EPC_FEAT_NUMERICAL].describe()
+
+# %%
+new_df = remove_outliers(
+    prep_epc,
+    cols=[
+        "TOTAL_FLOOR_AREA",
+        "CO2_EMISSIONS_CURRENT",
+        "CO2_EMISS_CURR_PER_FLOOR_AREA",
+        "ENERGY_CONSUMPTION_CURRENT",
+        "CURRENT_ENERGY_EFFICIENCY",
+    ],
+    remove_negative=True,
+)
+new_df[base_epc.EPC_FEAT_NUMERICAL].describe()
+
+# %%
+new_df
+
+# %%
+# cd ~/asf_venture_studio_archetypes/
+
+# %%
+from asf_venture_studio_archetypes.pipeline.dimensionality_reduction import *
+from asf_venture_studio_archetypes.pipeline import epc_processing
+
+
 # %%
 
-# %% [markdown]
-# ## PCA only on scaled features
-# Following the discussion with Josh, I try to perform the PCA only on numerical features, scaled and then merge back the nominal features
-#
+processed_data = load_and_process_data()
+
+# %%
+processed_data
+
+# %%
+processed_data[processed_data.INSPECTION_DATE.isna()]
+
+# %%
+imputer = False
+scaler = False
+ord_encoder = False
+oh_encoder = False
+
+# Load preprocessed epc data
+prep_epc = epc_data.load_preprocessed_epc_data(
+    data_path=DATA_DIR,
+    version="preprocessed_dedupl",
+    usecols=base_epc.EPC_SELECTED_FEAT,
+    batch="newest",
+    n_samples=5000,  # Comment to run on full dataset (~40 min)
+)
+
+# Extract year of inspection date
+if "INSPECTION_DATE" in base_epc.EPC_SELECTED_FEAT:
+    prep_epc = extract_year_inspection(prep_epc)
+
+# Outlier removal
+prep_epc = remove_outliers(
+    prep_epc,
+    cols=[
+        "TOTAL_FLOOR_AREA",
+        "CO2_EMISSIONS_CURRENT",
+        "CO2_EMISS_CURR_PER_FLOOR_AREA",
+        "ENERGY_CONSUMPTION_CURRENT",
+        "CURRENT_ENERGY_EFFICIENCY",
+    ],
+    remove_negative=True,
+)
+
+
+# if ord_encoder:   TO ADD
+
+if imputer:
+    # Fill missing values
+    prep_epc = fill_nans(
+        prep_epc, replace_with="mean", cols=base_epc.EPC_FEAT_NUMERICAL
+    )
+
+if scaler:
+    # Standard scaling for numeric features
+    prep_epc = standard_scaler(prep_epc, base_epc.EPC_FEAT_NUMERICAL)
+
+if oh_encoder:
+    # One hot encoding
+    prep_epc = one_hot_encoding(prep_epc, base_epc.EPC_FEAT_NOMINAL)
+
+prep_epc
+
+# %%
+df = pd.DataFrame({"A": [1, np.nan, 3, 4, 102], "B": [2, 3, 4, 5, 6]})
+epc_processing.remove_outliers(df, cols="A")
+
+# %%
+df = df[df.A < 4]
+
+
+# %%
+df
 
 # %%

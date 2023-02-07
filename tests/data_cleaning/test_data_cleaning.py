@@ -67,4 +67,4 @@ def test_remove_outliers():
 
     # Test remove_outliers function with a specified column
     df_out = epc_processing.remove_outliers(df, cols="A")
-    assert len(df_out) == 4  # Check number of rows in returned DataFrame
+    assert np.isnan(df.iloc[4, 0])

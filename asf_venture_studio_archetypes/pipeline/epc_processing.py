@@ -106,17 +106,22 @@ def standard_scaler(
 
 
 def remove_outliers(
-    df: pd.DataFrame, cols: Union[List[str], str] = None, percentile: int = 99
+    df: pd.DataFrame,
+    cols: Union[List[str], str] = None,
+    percentile: int = 99,
+    remove_negative: bool = False,
 ) -> pd.DataFrame:
-    """_summary_
+    """Returns DataFrame with outliers replaced with NaNs. Outliers are definied as teh values above the `percentile`,
+    and negative values (if remove_negative=True).
 
     Args:
         df (pd.DataFrame): DataFrame to process
         feat (Union[List[str], str], optional): List of features to remove outliers from. Defaults to df.columns.
         percentile (int, optional): Percentile value to use as upper threshold for removing outliers. Defaults to 99%.
+        remove_negative (bool, optional): Treat negative values as outliers. Default to False.
 
     Returns:
-        pd.DataFrame: DataFrame with outliers removes based on percentile theshold.
+        pd.DataFrame: DataFrame with outliers replaced with NaN based on percentile theshold.
     """
     if isinstance(cols, str):
         cols = [cols]
@@ -126,8 +131,12 @@ def remove_outliers(
     for col in cols:
         threshold = np.percentile(df[~np.isnan(df[col])][col], [percentile])
 
-        # Remove outliers
-        df = df[df[col] <= threshold[0]]
+        # Remove negative values
+        if remove_negative:
+            df[df[col] < 0] = np.nan
+
+        # Remove outliers based on percentile thresholding
+        df[df[col] > threshold[0]] = np.nan
 
     return df
 

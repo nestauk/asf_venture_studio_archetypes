@@ -9,6 +9,7 @@ from asf_venture_studio_archetypes.config.base_epc import DATA_DIR
 
 
 def load_and_process_data(
+    rem_outliers: bool = True,
     imputer: bool = True,
     scaler: bool = True,
     ord_encoder: bool = True,
@@ -26,6 +27,20 @@ def load_and_process_data(
     # Extract year of inspection date
     if "INSPECTION_DATE" in base_epc.EPC_SELECTED_FEAT:
         prep_epc = extract_year_inspection(prep_epc)
+
+    # Outlier removal
+    if rem_outliers:
+        prep_epc = remove_outliers(
+            prep_epc,
+            cols=[
+                "TOTAL_FLOOR_AREA",
+                "CO2_EMISSIONS_CURRENT",
+                "CO2_EMISS_CURR_PER_FLOOR_AREA",
+                "ENERGY_CONSUMPTION_CURRENT",
+                "CURRENT_ENERGY_EFFICIENCY",
+            ],
+            remove_negative=True,
+        )
 
     # if ord_encoder:   TO ADD
 
