@@ -21,7 +21,7 @@ def load_and_process_data(
         version="preprocessed_dedupl",
         usecols=base_epc.EPC_SELECTED_FEAT,
         batch="newest",
-        n_samples=5000,  # Comment to run on full dataset (~40 min)
+        n_samples=1000000,  # Comment to run on full dataset (~40 min)
     )
 
     # Extract year of inspection date

@@ -323,3 +323,20 @@ output_data = pd.concat(
 output_data.head()
 
 # %%
+data = pd.DataFrame({"column1": ["A", "B", "C", "A"], "column2": [1, 2, 3, 4]})
+one_hot_encoding(data, cols="column1")
+
+# %%
+data
+
+# %%
+prep_epc.CONSTRUCTION_AGE_BAND.unique()
+{
+    "1965-1975": 1970,
+}
+base_epc.EPC_FEAT_ORDINAL
+
+# %%
+prep_epc[base_epc.EPC_FEAT_NOMINAL]
+
+# %%

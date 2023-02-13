@@ -57,9 +57,6 @@ from asf_core_data import Path
 # **Note**: the keyword `data_path` will be renamed to `data_source` before the next merge.
 #
 
-# %% [markdown]
-# ## For Iman -------------
-
 # %%
 LOCAL_DATA_DIR = "/Users/enricogavagnin/Documents/data/EPC"
 
@@ -95,9 +92,6 @@ data_getters.download_core_data("epc_raw", LOCAL_DATA_DIR, batch="2021_Q2_0721")
 # %%time
 data_getters.download_core_data("epc_raw_combined", LOCAL_DATA_DIR, batch="newest")
 
-# %% [markdown]
-# ## For Iman -----------
-
 # %%
 # %%time
 data_getters.download_core_data(
@@ -117,9 +111,6 @@ data_getters.download_core_data(
 data_batches.check_for_newest_batch(
     data_path=LOCAL_DATA_DIR, check_folder="inputs", verbose=True
 )
-
-# %% [markdown]
-# ## For Iman -----------
 
 # %%
 data_batches.check_for_newest_batch(
