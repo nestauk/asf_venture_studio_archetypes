@@ -9,7 +9,6 @@ from asf_venture_studio_archetypes.config.base_epc import DATA_DIR
 
 
 def load_and_process_data():
-
     # Load preprocessed epc data
     prep_epc = epc_data.load_preprocessed_epc_data(
         data_path=DATA_DIR,
@@ -26,18 +25,21 @@ def load_and_process_data():
     # Extract year of inspection date
     prep_epc = extract_year_inspection(prep_epc)
 
+    # convert ordinal to numerical
+    prep_epc = averaging_construction_age_band(prep_epc)
+
     # Transform categorical features
-    cat_feat = list(
-        prep_epc.columns.intersection(
-            base_epc.EPC_PREP_CATEGORICAL + base_epc.EPC_PREP_ORDINAL
-        )
-    )
+    cat_feat = list(prep_epc.columns.intersection(base_epc.EPC_PREP_CATEGORICAL))
 
     # One hot encoding
     encoded_features = one_hot_encoding(prep_epc, cat_feat)
 
     # Transform numerical features
-    num_feat = list(prep_epc.columns.intersection(base_epc.EPC_PREP_NUMERICAL))
+    num_feat = list(
+        prep_epc.columns.intersection(
+            base_epc.EPC_PREP_NUMERICAL + base_epc.EPC_PREP_ORDINAL
+        )
+    )
 
     # Fill missing values
     prep_epc = fill_nans(prep_epc, replace_with="mean", cols=num_feat)
@@ -49,7 +51,6 @@ def load_and_process_data():
 
 
 def main():
-
     start_time = time.time()
     print("\nLoading and preprocessing EPC data.")
     processed_data = load_and_process_data()

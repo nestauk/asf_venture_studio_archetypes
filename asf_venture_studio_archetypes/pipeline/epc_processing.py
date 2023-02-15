@@ -129,3 +129,34 @@ def pca_perform(df: pd.DataFrame, **kwargs) -> Type[PCA]:
     pca.fit(X)
 
     return pca
+
+
+def averaging_construction_age_band(epc_df: pd.DataFrame):
+    """Replace "CONSTRUCTION_AGE_BAND" with median year
+
+    Args:
+        epc_df (pd.DataFrame): EPC dataframe with construction age band as dataframe
+
+    Returns:
+        pd.DataFrame: EPC dataframe with construction age as numerical dtype.
+    """
+    epc_df["CONSTRUCTION_AGE_BAND"] = epc_df["CONSTRUCTION_AGE_BAND"].replace(
+        {
+            "1900-1929": 1915,
+            "1930-1949": 1940,
+            "1950-1966": 1958,
+            "1965-1975": 1970,
+            "1976-1983": 1980,
+            "1983-1991": 1987,
+            "1991-1998": 1995,
+            "1996-2002": 1999,
+            "2003-2007": 2005,
+            "2007 onwards": 2007,
+            "Scotland: before 1919": 1919,
+            "England and Wales: before 1900": 1900,
+            "unknown": np.nan,
+        }
+    )
+
+    epc_df["CONSTRUCTION_AGE_BAND"] = epc_df["CONSTRUCTION_AGE_BAND"].astype("float")
+    return epc_df
