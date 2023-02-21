@@ -43,7 +43,7 @@ def test_fill_nans():
 def test_one_hot_encoding():
     """Test that the one hot encoding works as expected"""
     # Test data
-    data = {"column1": ["A", "B", "C", "A"], "column2": [1, 2, 1, 4]}
+    data = {"column1": ["A", "B", "C", "A"], "column2": [1, 2, 3, 4]}
 
     # Create test dataframe
     epc_df = pd.DataFrame(data)
