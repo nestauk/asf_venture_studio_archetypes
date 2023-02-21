@@ -26,7 +26,7 @@ def load_and_process_data():
     prep_epc = extract_year_inspection(prep_epc)
 
     # convert ordinal to numerical
-    prep_epc = averaging_construction_age_band(prep_epc)
+    prep_epc = encoder_construction_age_band(prep_epc)
 
     # Transform categorical features
     cat_feat = list(prep_epc.columns.intersection(base_epc.EPC_PREP_CATEGORICAL))

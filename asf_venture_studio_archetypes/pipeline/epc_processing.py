@@ -3,6 +3,7 @@ from typing import Union, List, Type
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
 import numpy as np
+import pandas as pd
 
 
 def extract_year_inspection(epc_df: pd.DataFrame) -> pd.DataFrame:
@@ -131,7 +132,7 @@ def pca_perform(df: pd.DataFrame, **kwargs) -> Type[PCA]:
     return pca
 
 
-def averaging_construction_age_band(epc_df: pd.DataFrame):
+def encoder_construction_age_band(epc_df: pd.DataFrame):
     """Replace "CONSTRUCTION_AGE_BAND" with median year
 
     Args:

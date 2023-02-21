@@ -43,7 +43,7 @@ def test_fill_nans():
 def test_one_hot_encoding():
     """Test that the one hot encoding works as expected"""
     # Test data
-    data = {"column1": ["A", "B", "C", "A"], "column2": [1, 2, 3, 4]}
+    data = {"column1": ["A", "B", "C", "A"], "column2": [1, 2, 1, 4]}
 
     # Create test dataframe
     epc_df = pd.DataFrame(data)
@@ -53,3 +53,48 @@ def test_one_hot_encoding():
 
     assert result.shape == (4, 3)
     assert result.columns.tolist() == ["column1_A", "column1_B", "column1_C"]
+
+
+def test_encoder_construction_age_band():
+    """Test that the encoder construction age band works as expected"""
+    # test data
+    data = {
+        "CONSTRUCTION_AGE_BAND": [
+            "1900-1929",
+            "1930-1949",
+            "1950-1966",
+            "1965-1975",
+            "1976-1983",
+            "1983-1991",
+            "1991-1998",
+            "1996-2002",
+            "2003-2007",
+            "2007 onwards",
+            "Scotland: before 1919",
+            "England and Wales: before 1900",
+            "unknown",
+        ]
+    }
+
+    # Create test dataframe
+    epc_df = pd.DataFrame(data)
+
+    # Process
+    result = epc_processing.encoder_construction_age_band(epc_df)
+
+    # Assert age band replaced with median year
+    assert result["CONSTRUCTION_AGE_BAND"].tolist()[0:-1] == [
+        1915.0,
+        1940.0,
+        1958.0,
+        1970.0,
+        1980.0,
+        1987.0,
+        1995.0,
+        1999.0,
+        2005.0,
+        2007.0,
+        1919.0,
+        1900.0,
+    ]
+    assert pd.isnull(result["CONSTRUCTION_AGE_BAND"].iloc[-1])
