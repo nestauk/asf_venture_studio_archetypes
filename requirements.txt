@@ -9,3 +9,4 @@ scikit-learn
 k-means-constrained==0.7.2
 nesta_ds_utils@git+https://github.com/nestauk/nesta_ds_utils.git
 asf_core_data@ git+ssh://git@github.com/nestauk/asf_core_data.git@pin-boto
+plotnine
