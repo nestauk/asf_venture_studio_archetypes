@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 
 sys.path.insert(1, "asf_venture_studio_archetypes/")
-from asf_venture_studio_archetypes.pipeline import epc_processing
+from asf_venture_studio_archetypes.utils import epc_processing
 
 
 def test_extract_year_inspection():
