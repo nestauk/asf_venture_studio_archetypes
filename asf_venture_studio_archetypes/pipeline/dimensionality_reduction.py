@@ -1,85 +1,88 @@
 import asf_core_data
 from asf_core_data.getters.epc import epc_data
 import time
+from typing import Union, List, Type
 from asf_venture_studio_archetypes.config import base_epc
-from asf_venture_studio_archetypes.pipeline.epc_processing import *
+from asf_venture_studio_archetypes.utils.epc_processing import *
+from sklearn.decomposition import PCA
 from asf_venture_studio_archetypes.utils.viz_utils import plot_pca_corr_feat
 from nesta_ds_utils.viz.altair.saving import save
 from asf_venture_studio_archetypes.config.base_epc import DATA_DIR
 
 
-def load_and_process_data():
-    # Load preprocessed epc data
-    prep_epc = epc_data.load_preprocessed_epc_data(
-        data_path=DATA_DIR,
-        version="preprocessed_dedupl",
-        usecols=base_epc.EPC_PREP_CLEAN_USE_FEAT_SELECTION,
-        batch="newest",
-        n_samples=5000,  # Comment to run on full dataset (~40 min)
-    )
+def PCA_numeric_only(
+    feat_list_num: List,
+    feat_list_cat: List,
+    n_sample: int = 10000,
+    plot_pca_corr: bool = False,
+    save_data: bool = False,
+):
+    """Pipeline that load, process and reduce dimensionality by PCA on the
+    numerical features only.
 
-    # Further data cleaning
-    feat_drop = ["POSTCODE"]  # haven't decided how to handle it yet
-    prep_epc.drop(columns=feat_drop, inplace=True)
+    Args:
+        feat_list_num (List): List of numerical features to load
+        feat_list_cat (List): List of categorical features to load
+        n_sample (int): Number of sample to load. Defaults tp 100000
+        plot_pca_corr (bool, optional): Plot correlation plot of PCA components. Defaults to False.
+        save_data (bool, optional): Save output data. Defaults to False.
+    """
 
-    # Extract year of inspection date
-    prep_epc = extract_year_inspection(prep_epc)
+    feat_list = feat_list_num + feat_list_cat
 
-    # convert ordinal to numerical
-    prep_epc = encoder_construction_age_band(prep_epc)
+    # Load data
+    prep_epc = load_data(feat_list, n_sample)
 
-    # Transform categorical features
-    cat_feat = list(prep_epc.columns.intersection(base_epc.EPC_PREP_CATEGORICAL))
-
-    # One hot encoding
-    encoded_features = one_hot_encoding(prep_epc, cat_feat)
-
-    # Transform numerical features
-    num_feat = list(
-        prep_epc.columns.intersection(
-            base_epc.EPC_PREP_NUMERICAL + base_epc.EPC_PREP_ORDINAL
-        )
-    )
-
-    # Fill missing values
-    prep_epc = fill_nans(prep_epc, replace_with="mean", cols=num_feat)
-
-    # Scale numeric features
-    scaled_features = standard_scaler(prep_epc, num_feat)
-
-    return pd.concat([scaled_features, encoded_features], axis=1)
-
-
-def main():
-    start_time = time.time()
-    print("\nLoading and preprocessing EPC data.")
-    processed_data = load_and_process_data()
-    end_time = time.time()
-    runtime = round((end_time - start_time) / 60)
-    print("Loading and preprocessing the EPC data took {} minutes.\n".format(runtime))
+    # Process data
+    processed_data = process_data(
+        prep_epc, feat_list_num, feat_list_cat, oh_encoder=False
+    ).copy()
 
     # Perform Principal Component Analysis
     start_time = time.time()
     print("Performing Principal Component Analysis (PCA).")
+
     # Selecting number of components which explain 95% of variance
-    pca = pca_perform(processed_data, n_components=0.95)
+    X = processed_data[feat_list_num].values
+    pca = PCA(n_components=0.95).fit(X)
+
+    pca_transformed_data = pd.DataFrame(
+        pca.transform(X),
+        columns=["PC" + str(c) for c in range(len(pca.components_))],
+    )
+
+    output_data = pd.concat([pca_transformed_data, processed_data], axis=1)
+
+    print(
+        "Dimensionality reduction: {} ---> {} ".format(
+            len(feat_list_num), len(pca.components_)
+        )
+    )
+
     end_time = time.time()
     runtime = round((end_time - start_time) / 60)
     print("Principal Component Analysis took {} minutes.\n".format(runtime))
 
-    # Saving and plotting results
-    start_time = time.time()
-    print("Saving and plotting results of PCA")
-    # Save correlation matrix of between features and components
-    pca_corr_feat = pd.DataFrame(pca.components_, columns=processed_data.columns).T
-    pca_corr_feat.to_csv("outputs/data/pca_corr_feat.csv")
-    fig = plot_pca_corr_feat(pca_corr_feat)
-    save(fig=fig, name="pca_corr_feat", path="outputs/figures/vegalite")
-    end_time = time.time()
-    runtime = round((end_time - start_time) / 60)
-    print("Saving and plotting results took {} minutes.\n".format(runtime))
+    if save_data:
+        output_data.to_csv("outputs/data/epc_dim_reduced_data.csv")
+
+    if plot_pca_corr:
+        # Saving and plotting results
+        start_time = time.time()
+        print("Saving and plotting results of PCA")
+        # Save correlation matrix of between features and components
+        pca_corr_feat = pd.DataFrame(pca.components_, columns=feat_list_num).T
+        pca_corr_feat.to_csv("outputs/data/pca_corr_feat.csv")
+        fig = plot_pca_corr_feat(pca_corr_feat)
+        save(fig=fig, name="pca_corr_feat", path="outputs/figures/vegalite")
+        end_time = time.time()
+        runtime = round((end_time - start_time) / 60)
+        print("Saving and plotting results took {} minutes.\n".format(runtime))
 
 
 if __name__ == "__main__":
     # Execute only if run as a script
-    main()
+    PCA_numeric_only(
+        feat_list_num=base_epc.EPC_FEAT_NUM_KMEANS,
+        feat_list_cat=base_epc.EPC_FEAT_CAT_KMEANS,
+    )

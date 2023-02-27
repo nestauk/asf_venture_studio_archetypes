@@ -1,9 +1,11 @@
 import pandas as pd
 from typing import Union, List, Type
-from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
+from asf_core_data.getters.epc import epc_data
+import time
 import numpy as np
 import pandas as pd
+from asf_venture_studio_archetypes.config.base_epc import DATA_DIR
 
 
 def extract_year_inspection(epc_df: pd.DataFrame) -> pd.DataFrame:
@@ -80,6 +82,42 @@ def one_hot_encoding(
     return encoded_df
 
 
+def remove_outliers(
+    df: pd.DataFrame,
+    cols: Union[List[str], str] = None,
+    percentile: int = 99,
+    remove_negative: bool = False,
+) -> pd.DataFrame:
+    """Returns DataFrame with outliers replaced with NaNs. Outliers are definied as teh values above the `percentile`,
+    and negative values (if remove_negative=True).
+
+    Args:
+        df (pd.DataFrame): DataFrame to process
+        feat (Union[List[str], str], optional): List of features to remove outliers from. Defaults to df.columns.
+        percentile (int, optional): Percentile value to use as upper threshold for removing outliers. Defaults to 99%.
+        remove_negative (bool, optional): Treat negative values as outliers. Default to False.
+
+    Returns:
+        pd.DataFrame: DataFrame with outliers replaced with NaN based on percentile theshold.
+    """
+    if isinstance(cols, str):
+        cols = [cols]
+    elif not cols:
+        cols = df.columns
+
+    for col in cols:
+        threshold = np.percentile(df[~np.isnan(df[col])][col], [percentile])
+
+        # Remove negative values
+        if remove_negative:
+            df[df[col] < 0] = np.nan
+
+        # Remove outliers based on percentile thresholding
+        df[df[col] > threshold[0]] = np.nan
+
+    return df
+
+
 def standard_scaler(
     epc_df: pd.DataFrame, num_feat: Union[List[str], str] = None
 ) -> pd.DataFrame:
@@ -108,28 +146,6 @@ def standard_scaler(
     X = epc_df[num_feat].values
     X = scaler.fit_transform(X)
     return pd.DataFrame(X, columns=num_feat)
-
-
-def pca_perform(df: pd.DataFrame, **kwargs) -> Type[PCA]:
-    """Perform Principal Component Analysis (PCA) on dataframe
-
-    Args:
-        df (pd.DataFrame): Dataframe to analyise
-        n_components (int, optional): Number of component for PCA. Defaults to 2.
-
-    Returns:
-        pd.DataFrame: Dataframe with PCA transformed data
-    """
-
-    X = df.values
-
-    # Create a PCA object
-    pca = PCA(**kwargs)
-
-    # Fit the PCA model to the data
-    pca.fit(X)
-
-    return pca
 
 
 def encoder_construction_age_band(epc_df: pd.DataFrame):
@@ -161,3 +177,81 @@ def encoder_construction_age_band(epc_df: pd.DataFrame):
 
     epc_df["CONSTRUCTION_AGE_BAND"] = epc_df["CONSTRUCTION_AGE_BAND"].astype("float")
     return epc_df
+
+
+def load_data(feat_list: List, n_sample: int):
+    start_time = time.time()
+    print("\nLoading EPC data.")
+    # Load preprocessed epc data
+    prep_epc = epc_data.load_preprocessed_epc_data(
+        data_path=DATA_DIR,
+        version="preprocessed_dedupl",
+        usecols=feat_list,
+        batch="newest",
+        n_samples=n_sample,  # Comment to run on full dataset (~40 min)
+    )
+    end_time = time.time()
+    runtime = round((end_time - start_time) / 60)
+    print("Loading the EPC data took {} minutes.\n".format(runtime))
+
+    return prep_epc
+
+
+def process_data(
+    prep_epc,
+    epc_feat_num,
+    epc_feat_cat,
+    extract_year=True,
+    rem_outliers: bool = True,
+    imputer: bool = True,
+    scaler: bool = True,
+    ord_encoder: bool = True,
+    oh_encoder: bool = False,
+):
+    start_time = time.time()
+    print("\nProcessing EPC data.")
+
+    # Extract year of inspection date
+    if extract_year:
+        prep_epc = extract_year_inspection(prep_epc)
+
+    # Outlier removal
+    if rem_outliers:
+        rem_out_cols = list(
+            set(prep_epc.columns).intersection(
+                set(
+                    [
+                        "TOTAL_FLOOR_AREA",
+                        "CO2_EMISS_CURR_PER_FLOOR_AREA",
+                        "ENERGY_CONSUMPTION_CURRENT",
+                        "CURRENT_ENERGY_EFFICIENCY",
+                    ]
+                )
+            )
+        )
+        prep_epc = remove_outliers(
+            prep_epc,
+            cols=rem_out_cols,
+            remove_negative=True,
+        )
+
+    if ord_encoder:
+        # convert ordinal to numerical
+        prep_epc = encoder_construction_age_band(prep_epc)
+
+    if imputer:
+        # Fill missing values
+        prep_epc = fill_nans(prep_epc, replace_with="mean", cols=epc_feat_num)
+
+    if scaler:
+        # Standard scaling for numeric features
+        prep_epc = standard_scaler(prep_epc, epc_feat_num)
+
+    if oh_encoder:
+        # One hot encoding
+        prep_epc = one_hot_encoding(prep_epc, epc_feat_cat)
+
+    end_time = time.time()
+    runtime = round((end_time - start_time) / 60)
+    print("Processing EPC data took {} minutes.\n".format(runtime))
+    return prep_epc
