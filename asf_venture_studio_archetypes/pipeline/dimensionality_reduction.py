@@ -1,13 +1,10 @@
-import asf_core_data
-from asf_core_data.getters.epc import epc_data
 import time
-from typing import Union, List, Type
+from typing import List
 from asf_venture_studio_archetypes.config import base_epc
 from asf_venture_studio_archetypes.utils.epc_processing import *
 from sklearn.decomposition import PCA
 from asf_venture_studio_archetypes.utils.viz_utils import plot_pca_corr_feat
 from nesta_ds_utils.viz.altair.saving import save
-from asf_venture_studio_archetypes.config.base_epc import DATA_DIR
 
 
 def PCA_numeric_only(
@@ -31,12 +28,12 @@ def PCA_numeric_only(
     feat_list = feat_list_num + feat_list_cat
 
     # Load data
-    prep_epc = load_data(feat_list, n_sample)
+    processed_data = load_data(feat_list, n_sample)
 
     # Process data
     processed_data = process_data(
-        prep_epc, feat_list_num, feat_list_cat, oh_encoder=False
-    ).copy()
+        processed_data, feat_list_num, feat_list_cat, oh_encoder=False
+    )
 
     # Perform Principal Component Analysis
     start_time = time.time()
