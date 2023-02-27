@@ -52,7 +52,7 @@ def fill_nans(
 
 
 def one_hot_encoding(
-    epc_df: pd.DataFrame, cat_feat: Union[List[str], str] = None
+    df: pd.DataFrame, cat_feat: Union[List[str], str] = None
 ) -> pd.DataFrame:
     """Performs one-hot encoding on categorical columns of a dataframe.
 
@@ -67,16 +67,16 @@ def one_hot_encoding(
 
     # Get the list of categorical features
     if not cat_feat:
-        cat_feat = epc_df.columns[epc_df.dtypes == object].tolist()
+        cat_feat = df.columns[df.dtypes == object].tolist()
     elif isinstance(cat_feat, str):
         cat_feat = [cat_feat]
 
     # Initialize the encoded data frame
-    encoded_df = pd.DataFrame()
+    encoded_df = df.drop(cat_feat, axis=1).copy()
 
     # One-hot encode each categorical feature
     for feat in cat_feat:
-        one_hot = pd.get_dummies(epc_df[feat], prefix=feat)
+        one_hot = pd.get_dummies(df[feat], prefix=feat)
         encoded_df = pd.concat([encoded_df, one_hot], axis=1)
 
     return encoded_df
@@ -119,7 +119,7 @@ def remove_outliers(
 
 
 def standard_scaler(
-    epc_df: pd.DataFrame, num_feat: Union[List[str], str] = None
+    df: pd.DataFrame, num_feat: Union[List[str], str] = None
 ) -> pd.DataFrame:
     """Standardize the numerical features of a pandas DataFrame by subtracting the mean
     and scaling to unit variance.
@@ -136,19 +136,21 @@ def standard_scaler(
 
     # Get the list of categorical features
     if not num_feat:
-        num_feat = epc_df.select_dtypes(include=np.number).columns.tolist()
+        num_feat = df.select_dtypes(include=np.number).columns.tolist()
     elif isinstance(num_feat, str):
         num_feat = [num_feat]
 
     # Create scaler object
     scaler = StandardScaler()
 
-    X = epc_df[num_feat].values
+    X = df[num_feat].values
     X = scaler.fit_transform(X)
-    return pd.DataFrame(X, columns=num_feat)
+
+    df[num_feat] = pd.DataFrame(X, columns=num_feat)
+    return df
 
 
-def encoder_construction_age_band(epc_df: pd.DataFrame):
+def encoder_construction_age_band(df: pd.DataFrame):
     """Replace "CONSTRUCTION_AGE_BAND" with median year
 
     Args:
@@ -157,7 +159,7 @@ def encoder_construction_age_band(epc_df: pd.DataFrame):
     Returns:
         pd.DataFrame: EPC dataframe with construction age as numerical dtype.
     """
-    epc_df["CONSTRUCTION_AGE_BAND"] = epc_df["CONSTRUCTION_AGE_BAND"].replace(
+    df["CONSTRUCTION_AGE_BAND"] = df["CONSTRUCTION_AGE_BAND"].replace(
         {
             "1900-1929": 1915,
             "1930-1949": 1940,
@@ -175,8 +177,8 @@ def encoder_construction_age_band(epc_df: pd.DataFrame):
         }
     )
 
-    epc_df["CONSTRUCTION_AGE_BAND"] = epc_df["CONSTRUCTION_AGE_BAND"].astype("float")
-    return epc_df
+    df["CONSTRUCTION_AGE_BAND"] = df["CONSTRUCTION_AGE_BAND"].astype("float")
+    return df
 
 
 def load_data(feat_list: List, n_sample: int):
@@ -192,7 +194,9 @@ def load_data(feat_list: List, n_sample: int):
     )
     end_time = time.time()
     runtime = round((end_time - start_time) / 60)
-    print("Loading the EPC data took {} minutes.\n".format(runtime))
+    print(
+        "Loading the EPC {} data took {} minutes.\n".format(np.shape(prep_epc), runtime)
+    )
 
     return prep_epc
 
@@ -247,11 +251,13 @@ def process_data(
         # Standard scaling for numeric features
         prep_epc = standard_scaler(prep_epc, epc_feat_num)
 
-    if oh_encoder:
+    if oh_encoder and len(epc_feat_cat) > 0:
         # One hot encoding
         prep_epc = one_hot_encoding(prep_epc, epc_feat_cat)
 
     end_time = time.time()
     runtime = round((end_time - start_time) / 60)
-    print("Processing EPC data took {} minutes.\n".format(runtime))
+    print(
+        "Processing EPC data {} took {} minutes.\n".format(np.shape(prep_epc), runtime)
+    )
     return prep_epc

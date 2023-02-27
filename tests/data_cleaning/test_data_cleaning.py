@@ -51,8 +51,8 @@ def test_one_hot_encoding():
     # Call the one_hot_encoding function
     result = epc_processing.one_hot_encoding(epc_df, ["column1"])
 
-    assert result.shape == (4, 3)
-    assert result.columns.tolist() == ["column1_A", "column1_B", "column1_C"]
+    assert result.shape == (4, 4)
+    assert result.columns.tolist() == ["column2", "column1_A", "column1_B", "column1_C"]
 
 
 def test_encoder_construction_age_band():
