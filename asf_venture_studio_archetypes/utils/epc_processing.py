@@ -34,6 +34,7 @@ def fill_nans(
         cols (Union[List[str], str]): specify which column to apply the fill nan function,
         Default: all numeric columns
 
+
     Returns:
         pd.DataFrame: EPC dataframe with nans replaces
     """
@@ -50,6 +51,41 @@ def fill_nans(
         epc_df[cols] = epc_df[cols].apply(lambda x: x.fillna(x.mode()[0]))
 
     return epc_df
+
+
+def drop_features_nan_tresholding(
+    df: pd.DataFrame, cols: Union[List[str], str] = None, tresh_nan: float = 0.2
+) -> pd.DataFrame:
+    """Drop features for which the proportion of nans exceed a given treshold
+
+    Args:
+        df (pd.DataFrame): Dataframe to process
+        cols (Union[List[str], str]): specify which columns to apply the tresholding,
+        tresh_nan (float): treshold of maximum proportion of nans to drop a feature, instead of imput nans.
+        Default: 0.20
+
+    Returns:
+        pd.DataFrame: Datafrma with features removed
+    """
+
+    if cols is None:
+        cols = df.select_dtypes(include=[np.number]).columns.tolist()
+    elif isinstance(cols, str):
+        cols = [cols]
+
+    # Check columns that exceed treshold
+    nan_prop = df[cols].isna().sum() / len(df)
+    drop_feat = list(nan_prop[nan_prop > tresh_nan].index)
+    if len(drop_feat):
+        for feat in drop_feat:
+            cols.remove(feat)
+            print(
+                "Feature {} was dropped as exceeds the max NaN treshold (prop NaNs: {})".format(
+                    feat, nan_prop[feat]
+                )
+            )
+
+    return df.drop(drop_feat, axis=1)
 
 
 def one_hot_encoding(
@@ -209,6 +245,7 @@ def process_data(
     extract_year: bool = True,
     feature_eng: bool = True,
     rem_outliers: bool = True,
+    drop_nan_tresh: bool = True,
     imputer: bool = True,
     scaler: bool = True,
     ord_encoder: bool = True,
@@ -273,6 +310,10 @@ def process_data(
     if ord_encoder:
         # convert ordinal to numerical
         prep_epc = encoder_construction_age_band(prep_epc)
+
+    if drop_nan_tresh:
+        prep_epc = drop_features_nan_tresholding(prep_epc, cols=epc_feat_num)
+        prep_epc = drop_features_nan_tresholding(prep_epc, cols=epc_feat_cat)
 
     if imputer:
         # Fill missing values

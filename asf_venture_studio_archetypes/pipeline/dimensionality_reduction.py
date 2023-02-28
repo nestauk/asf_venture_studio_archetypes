@@ -14,8 +14,8 @@ def PCA_numeric_only(
     plot_pca_corr: bool = False,
     save_data: bool = False,
 ):
-    """Pipeline that load, process and reduce dimensionality by PCA on the
-    numerical features only.
+    """Pipeline that load, process and reduce dimensionality by PCA. The PCA is applied only
+    on the numerical features, while categorical ones are elft unchanged.
 
     Args:
         feat_list_num (List): List of numerical features to load
