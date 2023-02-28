@@ -32,7 +32,7 @@ def KMeans_apply(df: pd.DataFrame, col_name: str = "cluster", **kwargs) -> pd.Da
     return df
 
 
-def KMeans_elbow_method(df: pd.DataFrame, max_clusters: int) -> int:
+def KMeans_elbow_method(df: pd.DataFrame, max_clusters: int, plot: bool = True) -> int:
     """Perform elbow method with K-means to determine optimal number of cluster
 
     TO DO: add visualisation plot
@@ -40,6 +40,7 @@ def KMeans_elbow_method(df: pd.DataFrame, max_clusters: int) -> int:
     Args:
         data (pd.DataFrame): Data to use for clustering (numerical)
         max_clusters (int): Maximum number of clusters to use for K-means
+        plot (bool): Plot and save results of elbow analysis. Default to True.
 
     Returns:
         int: Optimal number of clusters. Returns None of not found.
@@ -53,10 +54,11 @@ def KMeans_elbow_method(df: pd.DataFrame, max_clusters: int) -> int:
         kmeans.fit(X)
         inertias.append(kmeans.inertia_)
 
-    plt.plot(range(1, max_clusters + 1), inertias, marker="o")
-    plt.xlabel("Number of clusters")
-    plt.ylabel("Inertia")
-    plt.show()
+    if plot:
+        plt.plot(range(1, max_clusters + 1), inertias, marker="o")
+        plt.xlabel("Number of clusters")
+        plt.ylabel("Inertia")
+        plt.savefig("outputs/figures/elbow_analysis.png")
 
     # Determine the optimal number of clusters using the elbow method
     optimal_clusters = None
@@ -93,6 +95,8 @@ def KMeans_silhouette_analysis(
 
     if plot:
         plt.plot(n_cluster_vals, sil_coeff)
+        plt.xlabel("Number of clusters")
+        plt.ylabel("Silhouette Score")
         plt.savefig("outputs/figures/silhouette_analysis.png")
 
     print(
