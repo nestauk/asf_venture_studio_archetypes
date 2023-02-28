@@ -111,10 +111,10 @@ def remove_outliers(
 
         # Remove negative values
         if remove_negative:
-            df[df[col] < 0] = np.nan
+            df.loc[df[col] < 0, col] = np.nan
 
         # Remove outliers based on percentile thresholding
-        df[df[col] > threshold[0]] = np.nan
+        df.loc[df[col] > threshold[0], col] = np.nan
 
     return df
 
