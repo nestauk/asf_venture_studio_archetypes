@@ -6,6 +6,7 @@ import time
 import numpy as np
 import pandas as pd
 from asf_venture_studio_archetypes.config.base_epc import DATA_DIR
+from asf_venture_studio_archetypes.utils.feature_engineering import *
 
 
 def extract_year_inspection(epc_df: pd.DataFrame) -> pd.DataFrame:
@@ -205,7 +206,8 @@ def process_data(
     prep_epc,
     epc_feat_num,
     epc_feat_cat,
-    extract_year=True,
+    extract_year: bool = True,
+    feature_eng: bool = True,
     rem_outliers: bool = True,
     imputer: bool = True,
     scaler: bool = True,
@@ -218,6 +220,35 @@ def process_data(
     # Extract year of inspection date
     if extract_year:
         prep_epc = extract_year_inspection(prep_epc)
+
+    # Add engineered features
+    if feature_eng:
+        # Roof engineered features
+        prep_epc = roof_description_features(prep_epc)
+        epc_feat_cat += ["ROOF_TYPE", "ROOF_INSULATION"]
+        epc_feat_num += ["LOFT_INSULATION_mm", "ROOF_THERMAL_TRANSMIT"]
+
+        # Walls engineered features
+        prep_epc = walls_description_features(prep_epc)
+        epc_feat_cat += ["WALL_TYPE", "WALLS_INSULATION"]
+        epc_feat_num += ["WALLS_THERMAL_TRANSMIT"]
+
+        # Floor engineered features
+        prep_epc = floor_description_features(prep_epc)
+        epc_feat_cat += ["FLOOR_TYPE", "FLOOR_INSULATION"]
+        epc_feat_num += ["FLOOR_THERMAL_TRANSMIT"]
+
+        # Drop description features
+        prep_epc.drop(
+            ["WALLS_DESCRIPTION", "ROOF_DESCRIPTION", "FLOOR_DESCRIPTION"],
+            axis=1,
+            inplace=True,
+        )
+        epc_feat_cat = [
+            f
+            for f in epc_feat_cat
+            if f not in ["FLOOR_DESCRIPTION", "WALLS_DESCRIPTION", "ROOF_DESCRIPTION"]
+        ]
 
     # Outlier removal
     if rem_outliers:

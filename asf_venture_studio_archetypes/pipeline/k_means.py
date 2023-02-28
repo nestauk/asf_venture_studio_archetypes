@@ -129,6 +129,8 @@ def pipeline_kmeans_selected_features():
     # Saving data
     processed_data.to_csv("outputs/data/k_means_selected_features.csv")
 
+    return processed_data
+
 
 if __name__ == "__main__":
     # Execute only if run as a script

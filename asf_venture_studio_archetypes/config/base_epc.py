@@ -3,7 +3,7 @@ import pandas as pd
 # Data directory
 # You can set this to your local data directory or "S3"
 DATA_DIR = "S3"
-# DATA_DIR = "/Users/enricogavagnin/Documents/data/EPC"
+DATA_DIR = "/Users/enricogavagnin/Documents/data/EPC"
 
 
 # Feature selection
@@ -141,7 +141,7 @@ EPC_FEAT_NUM_KMEANS = [
 EPC_FEAT_CAT_KMEANS = [
     "BUILT_FORM",
     #    "ENERGY_TARIFF",
-    #'FLOOR_DESCRIPTION',
+    "FLOOR_DESCRIPTION",
     #    "GLAZED_TYPE",
     "HEATING_FUEL",
     "HEATING_SYSTEM",
@@ -154,11 +154,11 @@ EPC_FEAT_CAT_KMEANS = [
     "MAINS_GAS_FLAG",
     #'POSTCODE', #havn't decided how to handle it yet
     "PROPERTY_TYPE",
-    #'ROOF_DESCRIPTION',
+    "ROOF_DESCRIPTION",
     #'SECONDHEAT_DESCRIPTION',
     "SOLAR_WATER_HEATING_FLAG",
     #    "TENURE",
     "TRANSACTION_TYPE",
-    #'WALLS_DESCRIPTION',
+    "WALLS_DESCRIPTION",
     #'WINDOWS_DESCRIPTION'
 ]
