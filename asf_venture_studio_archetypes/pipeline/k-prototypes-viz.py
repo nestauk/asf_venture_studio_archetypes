@@ -5,6 +5,7 @@ import asf_core_data
 import pandas as pd
 from asf_core_data import load_preprocessed_epc_data
 from asf_core_data.getters.epc import epc_data, data_batches
+from asf_venture_studio_archetypes.utils.plotting import configure_plots
 from asf_core_data import Path
 from asf_venture_studio_archetypes.config import base_epc
 from asf_venture_studio_archetypes.pipeline.epc_processing import *
@@ -17,6 +18,13 @@ import matplotlib.pyplot as plt
 import umap
 from tqdm import tqdm
 import plotly.graph_objects as go
+import altair as alt
+from datetime import datetime
+
+# yyy-mm-dd
+date = datetime.today().year
+dimension = 15
+
 
 # define local data directory
 DATA_DIR = "/Users/imanmuse/Documents/data/EPC"
@@ -53,7 +61,6 @@ cat_feat = list(prep_epc.columns.intersection(base_epc.EPC_PREP_CATEGORICAL))
 # One hot encoding
 encoded_features = one_hot_encoding(prep_epc, cat_feat)
 categorical = encoded_features
-categorical = pd.get_dummies(categorical)
 
 # Percentage of columns which are categorical is used as weight parameter in embeddings later
 categorical_weight = (
@@ -61,8 +68,8 @@ categorical_weight = (
 )
 
 # Embedding numerical & categorical
-fit1 = umap.UMAP(metric="l2").fit(numerical)
-fit2 = umap.UMAP(metric="dice").fit(categorical)
+fit1 = umap.UMAP(metric="l2", n_components=dimension).fit(numerical)
+fit2 = umap.UMAP(metric="dice", n_components=dimension).fit(categorical)
 
 # Augmenting the numerical embedding with categorical
 intersection = umap.umap_.general_simplicial_set_intersection(
@@ -91,7 +98,7 @@ embedding = umap.umap_.simplicial_set_embedding(
 
 plt.figure(figsize=(20, 10))
 embedding = embedding[0]
-plt.scatter(*embedding.T, s=2, cmap="Spectral", alpha=1.0)
+# plt.scatter(*embedding.T, s=2, cmap="Spectral", alpha=1.0)
 # plt.show()
 
 
@@ -131,12 +138,37 @@ clusters_assigned = []
 # fig = go.Figure(data=go.Scatter(x=n_clusters, y=costs ))
 # fig.show()
 
-fig, ax = plt.subplots()
-fig.set_size_inches((20, 10))
-scatter = ax.scatter(
-    embedding[:, 0], embedding[:, 1], s=2, c=clusters, cmap="tab20b", alpha=1.0
+# fig, ax = plt.subplots()
+# fig.set_size_inches((20, 10))
+# scatter = ax.scatter(
+#     embedding[:, 0], embedding[:, 1], s=2, c=clusters, cmap="tab20b", alpha=1.0
+# )
+
+# # produce a legend with the unique colors from the scatter
+# legend1 = ax.legend(*scatter.legend_elements(num=15), loc="lower left", title="Classes")
+# ax.add_artist(legend1)
+
+# scatter plot
+prep_epc["x"] = embedding[:, 0]
+prep_epc["y"] = embedding[:, 1]
+prep_epc["clusters"] = list(clusters)
+
+fig = (
+    alt.Chart(prep_epc)
+    .mark_circle()
+    .encode(
+        x="x",
+        y="y",
+        color="clusters",
+        tooltip=[
+            "CONSTRUCTION_AGE_BAND",
+            "CURRENT_ENERGY_EFFICIENCY",
+            "CO2_EMISSIONS_CURRENT",
+            "TENURE",
+        ],
+    )
+    .interactive()
 )
 
-# produce a legend with the unique colors from the scatter
-legend1 = ax.legend(*scatter.legend_elements(num=15), loc="lower left", title="Classes")
-ax.add_artist(legend1)
+fig.save(f"outputs/figures/k-proto-scatter-{date}-{dimension}-dimension.html")
+prep_epc.to_csv(f"outputs/data/k-proto-cluster-{date}-{dimension}-dimension.csv")
