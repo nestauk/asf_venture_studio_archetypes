@@ -79,7 +79,8 @@ def feature_importance(
         cluster_name (str, optional): Name of cluster to use for filtering, Default to "cluster".
         verbose (bool, optional): Option to printthe results as text. Defaults to False.
         plot (bool, optional): Option to show and save plot the results. Defaults to True.
-        path (str, optional): Path where to save the figure. Defaults to None.
+        path (str, optional): Path where to save the figure. Defaults to
+        "outputs/figures/clustering_interpretation/".
 
     Returns:
         pd.DataFrame: Data frame with the feature relative importance (cols) for different clusters (raws)
@@ -147,3 +148,27 @@ def feature_importance(
             ignore_index=True,
         )
     return df_imp
+
+
+def plot_compare_feat_importance(df: pd.DataFrame, path: str = None):
+    """Compare feature importance for all clusters
+
+    Args:
+        df (pd.DataFrame): Data frame with the feature relative importance (cols)
+        for different clusters (raws). Output of "feature_importance"
+        path (str, optional): Path where to save the figure. Defaults to
+        "outputs/figures/clustering_interpretation/".
+    """
+
+    if not path:
+        path = "outputs/figures/clustering_interpretation/"
+
+    make_path_if_not_exist(path)
+
+    plt.figure(figsize=(7, len(df) // 3))
+    df = df.T.reset_index().melt("index", var_name="cluster", value_name="Importance")
+    plt.title("Feature importance")
+    sns.barplot(df, y="index", x="Importance", hue="cluster")
+
+    # Save plot
+    plt.savefig(path + "comparison_feat_importance.png")
