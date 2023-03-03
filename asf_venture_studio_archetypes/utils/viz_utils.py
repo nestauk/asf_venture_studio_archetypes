@@ -121,7 +121,13 @@ def plot_scatter_joint_feat_cls(
 
     make_path_if_not_exist(path)
 
-    sns.jointplot(df, x=feat_x, y=feat_y, hue=cluster_name, palette=sns.color_palette())
+    sns.jointplot(
+        df,
+        x=feat_x,
+        y=feat_y,
+        hue=cluster_name,
+        palette=sns.color_palette(n_colors=max(df[cluster_name])),
+    )
     plt.xticks(rotation=90)
     plt.tight_layout()
     plt.savefig(path + feat_x + feat_y + ".png")
