@@ -173,7 +173,7 @@ def standard_scaler(
 
     # Get the list of categorical features
     if not num_feat:
-        num_feat = df.select_dtypes(include=np.number).columns.tolist()
+        num_feat = df.select_dtypes(include=[np.number, bool]).columns.tolist()
     elif isinstance(num_feat, str):
         num_feat = [num_feat]
 
@@ -319,13 +319,16 @@ def process_data(
         # Fill missing values
         prep_epc = fill_nans(prep_epc, replace_with="mean", cols=epc_feat_num)
 
-    if scaler:
-        # Standard scaling for numeric features
-        prep_epc = standard_scaler(prep_epc, epc_feat_num)
-
     if oh_encoder and len(epc_feat_cat) > 0:
         # One hot encoding
         prep_epc = one_hot_encoding(prep_epc, epc_feat_cat)
+
+    if scaler:
+        # Standard scaling for numeric features
+        if oh_encoder:
+            prep_epc = standard_scaler(prep_epc)
+        else:
+            prep_epc = standard_scaler(prep_epc, epc_feat_num)
 
     end_time = time.time()
     runtime = round((end_time - start_time) / 60)
