@@ -165,7 +165,7 @@ def plot_compare_feat_importance(df: pd.DataFrame, path: str = None):
 
     make_path_if_not_exist(path)
 
-    plt.figure(figsize=(7, len(df) // 3))
+    plt.figure(figsize=(7, len(df.T) // 3))
     df = df.T.reset_index().melt("index", var_name="cluster", value_name="Importance")
     plt.title("Feature importance")
     sns.barplot(df, y="index", x="Importance", hue="cluster")

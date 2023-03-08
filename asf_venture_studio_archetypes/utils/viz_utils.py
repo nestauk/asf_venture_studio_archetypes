@@ -126,7 +126,7 @@ def plot_scatter_joint_feat_cls(
         x=feat_x,
         y=feat_y,
         hue=cluster_name,
-        palette=sns.color_palette(n_colors=max(df[cluster_name])),
+        palette=sns.color_palette(n_colors=max(df[cluster_name]) + 1),
     )
     plt.xticks(rotation=90)
     plt.tight_layout()

@@ -100,6 +100,7 @@ def KMeans_silhouette_analysis(
     if plot:
         sns.lineplot(pd.DataFrame(sil_coeff).melt(), x="variable", y="value")
         plt.xlabel("Number of clusters")
+        plt.xticks(range(len(n_cluster_vals)), n_cluster_vals)
         plt.ylabel("Silhouette Score")
         plt.savefig("outputs/figures/silhouette_analysis.png")
 
@@ -110,7 +111,7 @@ def KMeans_silhouette_analysis(
 
     print(
         "Silhouette Analysis: optimal number of clusters: {} with Silhouette Score of {}".format(
-            np.argmax(sil_coeff), np.max(sil_coeff)
+            list(n_cluster_vals)[np.argmax(sil_coeff)], np.max(sil_coeff)
         )
     )
 
