@@ -46,6 +46,9 @@ def plot_dist_cls(
     if not path:
         path = "outputs/figures/clustering_viz/"
 
+    # Plot cluster distribution
+    sns.histplot(df, x=cluster_name, palette=sns.color_palette())
+
     for c_feat in hist_feat:
         plt.figure()
         plot_hist_cat_feat_cls(df, feat=c_feat, path=path, cluster_name=cluster_name)

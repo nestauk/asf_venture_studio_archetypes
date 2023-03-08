@@ -1,5 +1,6 @@
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
+from k_means_constrained import KMeansConstrained
 from asf_venture_studio_archetypes.utils.epc_processing import *
 from asf_venture_studio_archetypes.config import base_epc
 from typing import Iterator
@@ -23,7 +24,7 @@ def KMeans_apply(df: pd.DataFrame, col_name: str = "cluster", **kwargs) -> pd.Da
     start_time = time.time()
     print("Performing K-means.")
     X = df.values
-    kmeans = KMeans(**kwargs).fit(X)
+    kmeans = KMeansConstrained(**kwargs).fit(X)
     labels = kmeans.labels_
     df[col_name] = labels
 
