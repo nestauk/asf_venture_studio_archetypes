@@ -108,6 +108,8 @@ target/
 !/inputs/*.md
 /outputs/data/*
 !/outputs/data/*.md
+/outputs/figures/clustering_viz*
+/outputs/figures/clustering_interpretation*
 /outputs/models/*
 !/outputs/models/*.md
 

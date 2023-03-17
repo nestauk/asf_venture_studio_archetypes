@@ -1,11 +1,13 @@
 from sklearn.metrics import silhouette_score
 from sklearn.cluster import KMeans
+from k_means_constrained import KMeansConstrained
 from asf_venture_studio_archetypes.utils.epc_processing import *
 from asf_venture_studio_archetypes.config import base_epc
 from typing import Iterator
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
+import seaborn as sns
 
 
 def KMeans_apply(df: pd.DataFrame, col_name: str = "cluster", **kwargs) -> pd.DataFrame:
@@ -22,7 +24,7 @@ def KMeans_apply(df: pd.DataFrame, col_name: str = "cluster", **kwargs) -> pd.Da
     start_time = time.time()
     print("Performing K-means.")
     X = df.values
-    kmeans = KMeans(**kwargs).fit(X)
+    kmeans = KMeansConstrained(**kwargs).fit(X)
     labels = kmeans.labels_
     df[col_name] = labels
 
@@ -70,7 +72,7 @@ def KMeans_elbow_method(df: pd.DataFrame, max_clusters: int, plot: bool = True) 
 
 
 def KMeans_silhouette_analysis(
-    df: pd.DataFrame, n_cluster_vals: Iterator, plot: bool = True
+    df: pd.DataFrame, n_cluster_vals: Iterator, plot: bool = True, reps: int = 1
 ) -> int:
     """Perform Silhouette analysis with K-means to determine optimal number of cluster
 
@@ -78,6 +80,7 @@ def KMeans_silhouette_analysis(
         df (pd.DataFrame): Data to use for clustering (numerical)
         n_cluster_vals (Iterator): Range of cluster numners to use of the S-analysis
         plot (bool, optional): Plot and save plot. Defaults to True.
+        reps (int, optional): Repeat silhouette analysis rep times and avarege results.
 
     Returns:
         int: Optimal number of clusters.
@@ -87,21 +90,29 @@ def KMeans_silhouette_analysis(
     print("Performing Silhouette analysis.")
 
     X = df.values
-    sil_coeff = np.zeros(np.shape(n_cluster_vals))
-    for i, n_cluster in enumerate(n_cluster_vals):
-        kmeans = KMeans(n_clusters=n_cluster, n_init=10).fit(X)
-        label = kmeans.labels_
-        sil_coeff[i] = silhouette_score(X, label, metric="euclidean")
+    sil_coeff = np.zeros((reps, len(n_cluster_vals)))
+
+    for rep in range(reps):
+        for i, n_cluster in enumerate(n_cluster_vals):
+            kmeans = KMeans(n_clusters=n_cluster, n_init=10).fit(X)
+            label = kmeans.labels_
+            sil_coeff[rep, i] = silhouette_score(X, label, metric="euclidean")
 
     if plot:
-        plt.plot(n_cluster_vals, sil_coeff)
+        sns.lineplot(pd.DataFrame(sil_coeff).melt(), x="variable", y="value")
         plt.xlabel("Number of clusters")
+        plt.xticks(range(len(n_cluster_vals)), n_cluster_vals)
         plt.ylabel("Silhouette Score")
         plt.savefig("outputs/figures/silhouette_analysis.png")
 
+    if reps > 1:
+        sil_coeff = np.mean(sil_coeff)
+    else:
+        sil_coeff = np.array(sil_coeff)
+
     print(
         "Silhouette Analysis: optimal number of clusters: {} with Silhouette Score of {}".format(
-            list(n_cluster_vals)[list(sil_coeff).index(max(sil_coeff))], max(sil_coeff)
+            list(n_cluster_vals)[np.argmax(sil_coeff)], np.max(sil_coeff)
         )
     )
 
@@ -109,7 +120,7 @@ def KMeans_silhouette_analysis(
     runtime = round((end_time - start_time) / 60)
     print("Silhouette analysis took {} minutes.\n".format(runtime))
 
-    return list(n_cluster_vals)[list(sil_coeff).index(max(sil_coeff))]
+    return np.argmax(sil_coeff)
 
 
 def pipeline_kmeans_selected_features():
