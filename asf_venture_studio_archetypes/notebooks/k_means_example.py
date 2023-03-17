@@ -64,7 +64,7 @@ pro_df["cluster"] = load_df["cluster"]
 # Plot features relative importance
 
 # %%
-df_imp = feature_importance(pro_df.copy())
+df_imp = feature_importance(pro_df.copy(), cluster_name="cluster")
 plot_compare_feat_importance(df_imp.copy())
 
 # %% [markdown]

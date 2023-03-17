@@ -89,6 +89,11 @@ def feature_importance(
         pd.DataFrame: Data frame with the feature relative importance (cols) for different clusters (raws)
     """
 
+    if not cluster_name in df.columns:
+        raise Exception(
+            f"'{cluster_name}' not found as dataframe column. You can input the correct name with 'cluter_name=... '"
+        )
+
     if not feat_list:
         feat_list = list(df.columns)
         feat_list.remove(cluster_name)
@@ -100,7 +105,8 @@ def feature_importance(
 
     df_imp = pd.DataFrame(columns=feat_list)
 
-    oh_cls = pd.get_dummies(df["cluster"])
+    oh_cls = pd.get_dummies(df[cluster_name])
+
     for c in range(max(df[cluster_name]) + 1):
         clf = RandomForestClassifier(random_state=1)
         clf.fit(df[feat_list].values, oh_cls[c].values)
